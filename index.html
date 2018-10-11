@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Cities finder</title>
+
+  <style>
+    * {
+      margin: 0;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(137deg, #FE7F9C, #ED2939) no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      align-self: center;
+      width: 40%;
+      margin: auto;
+      margin-top: 5rem;
+    }
+
+    .suggestions {
+      align-self: center;
+      background-color: #f1f1f1f1;
+      margin: 5px;
+      padding: 1rem;
+      align-self: inherit;
+    }
+
+    .suggestions:nth-child(2n+1) {
+      background-color: lightgrey;
+    }
+
+    .search {
+      width: 100%;
+      align-self: center;
+      border: 5px #f1f1 solid;
+      box-shadow: #111 1px;
+      padding: 5px;
+      text-align: center;
+    }
+
+    .cities-list {
+      list-style: none;
+      width: 100%;
+      padding: 0;
+    }
+
+    .cities-list > li {
+      font-size: 110%;
+    }
+
+    .matched {
+      background-color: #ED2939;
+      border: 1px #ED2939 solid;
+      border-radius: 5px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <input type="text" name="query" class="search" placeholder="City or State" />
+
+    <ul class="cities-list">
+    </ul>
+  </div>
+
+  <script>
+    const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+    const cities = [];
+
+    fetch(endpoint)
+      .then(blob => blob.json())
+      .then(data => cities.push(...data));
+
+    function findMatches(wordToMatch, cities) {
+      return cities.filter(place => {
+        const regExp = new RegExp(wordToMatch, 'gi');
+        return place.city.match(regExp) || place.state.match(regExp);
+      });
+    }
+
+    function displayMatches() {
+      const matches = this.value ? findMatches(this.value, cities) : [];
+      const html = matches.map(match => {
+        const regex = new RegExp(this.value, 'gi');
+        const cityName = match.city.replace(regex, `<span class="matched">${this.value}</span>`)
+        const stateName = match.state.replace(regex, `<span class="matched">${this.value}</span>`)
+        return `
+        <li class="suggestions">
+          ${cityName}, ${stateName}
+        </li>
+      `}).join('');
+
+      citiesList.innerHTML = html;
+      console.log(html);
+    }
+
+    const searchInput = document.querySelector('.search');
+    const citiesList = document.querySelector('.cities-list');
+
+    searchInput.addEventListener('change', displayMatches);
+    searchInput.addEventListener('keyup', displayMatches);
+  </script>
+</body>
+
+</html>
